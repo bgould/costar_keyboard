@@ -7,6 +7,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+#ifndef __EXTERNAL_INIT__
 /* Extra definitions for AVR stuff. */
 #include "../lib/avr_extra.h"
 /* include keycode definitions. */
@@ -14,6 +15,7 @@
 
 #define STR_MANUFACTURER L"Bathroom Epiphanies, Costar Keyboard -"
 #define VENDOR_ID        0x16C0
+#endif
 
 #define NUMBER_OF_ROWS     18
 #define NUMBER_OF_COLUMNS   8

@@ -5,8 +5,10 @@
 
 #include "common.h"
 
+#ifndef __EXTERNAL_INIT__
 #define STR_PRODUCT      L"Filco Majestouch"
 #define PRODUCT_ID       0x047D
+#endif
 
 #define ROW_PORT  PORTD
 #define ROW_MASK  0b01110111

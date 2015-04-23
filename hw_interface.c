@@ -45,11 +45,30 @@ void pull_row(uint8_t r) {
 }
 
 void release_rows(void) {
-  PORTD |= ROW_MASK;
+  ROW_PORT |= ROW_MASK;
 }
 
 bool probe_column(uint8_t c) {
   return (*column_pins[c].pin & column_pins[c].bit) == 0;
+}
+
+void pins_init() {
+  /* We map the controller pins in they way described by
+   * `INPUT_PINS` and `OUTPUT_PINS`. These two constants are
+   * model-specific and defined in the imported
+   * `KEYBOARD_MODEL_FILE`. Together they describe which of the
+   * available 3*8 I/O pins are to be used for input (those marked
+   * with 1 in INPUT_PINS), which for output (those marked with 1
+   * in OUTPUT_PINS) and which are unused (those marked with 0 both
+   * in INPUT_PINS and OUTPUT_PINS). */
+  struct pin input_pins[3] = INPUT_PINS;
+  struct pin output_pins[3] = OUTPUT_PINS;
+  for(int i=0; i<3; i++) {
+    *input_pins[i].ddr = *input_pins[i].ddr & ~input_pins[i].bits;
+    *input_pins[i].port = *input_pins[i].port | input_pins[i].bits;
+    *output_pins[i].ddr = *output_pins[i].ddr | output_pins[i].bits;
+    *output_pins[i].port = *output_pins[i].port  & ~output_pins[i].bits;
+  }
 }
 
 // 2 = scroll lock, 1 = caps lock, 0 = num lock.
@@ -86,6 +105,9 @@ void update_leds(uint8_t keyboard_leds) {
 #endif
 }
 
+// this function name clashes with T.M.K. firmware; the #define below can be
+// used to carve out this function but still use the others in this file
+#ifndef __EXTERNAL_INIT__
 /* ### keyboard_init
  *
  * Set up the ATmega32 microcontroller.
@@ -93,7 +115,6 @@ void update_leds(uint8_t keyboard_leds) {
  * This function is called very early in `init` and will never be
  * called again.
  */
-
 void keyboard_init() {
   /* First we set the CPU frenquence to 16MHz instead of the
    * default 2MHz. */
@@ -102,23 +123,9 @@ void keyboard_init() {
   /* Second we disable JTAG: we will not use it. */
   MCUCR |= 0x80; MCUCR |= 0x80;
 
-  /* Then we map the controller pins in they way described by
-   * `INPUT_PINS` and `OUTPUT_PINS`. These two constants are
-   * model-specific and defined in the imported
-   * `KEYBOARD_MODEL_FILE`. Together they describe which of the
-   * available 3*8 I/O pins are to be used for input (those marked
-   * with 1 in INPUT_PINS), which for output (those marked with 1
-   * in OUTPUT_PINS) and which are unused (those marked with 0 both
-   * in INPUT_PINS and OUTPUT_PINS). */
-  struct pin input_pins[3] = INPUT_PINS;
-  struct pin output_pins[3] = OUTPUT_PINS;
-  for(int i=0; i<3; i++) {
-    *input_pins[i].ddr = *input_pins[i].ddr & ~input_pins[i].bits;
-    *input_pins[i].port = *input_pins[i].port | input_pins[i].bits;
-    *output_pins[i].ddr = *output_pins[i].ddr | output_pins[i].bits;
-    *output_pins[i].port = *output_pins[i].port  & ~output_pins[i].bits;
-  }
-
+  /* Then set up the input and output pins (see function below) */
+  pins_init();
+  
   /* Last we set up the timer that will trigger an interrupt about
    * every millisecond. We will set up the timer without enabling it;
    * it will be enabled by the `main` function once the hardware is
@@ -170,3 +177,4 @@ void poll_timer_disable(void) {
   TIMSK0 &=       // Timer interrupt mask register 0
     ~(1<<OCIE0A); // Disable timer interrupt on compare match with OCR0A
 }
+#endif

@@ -11,6 +11,7 @@ void release_rows(void);
 bool probe_column(uint8_t col);
 void update_leds(uint8_t keyboard_leds);
 void keyboard_init(void);
+void pins_init(void);
 void poll_timer_setup(void);
 void poll_timer_enable(void);
 void poll_timer_disable(void);

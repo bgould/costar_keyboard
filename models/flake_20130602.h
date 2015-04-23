@@ -5,8 +5,10 @@
 
 #include "common.h"
 
+#ifndef __EXTERNAL_INIT__
 #define STR_PRODUCT      L"CM Storm Quick Fire Rapid"
 #define PRODUCT_ID       0x047D
+#endif
 
 #define ROW_PORT  PORTB
 #define ROW_MASK  0b01111110
